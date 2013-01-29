@@ -1,10 +1,13 @@
+# python ip_detect.py > /dev/null 2>&1
 '''
-Finds your external IP address
+Finds your IP address
 '''
 import requests
 import socket
 import yaml
 from collections import Counter
+from plumbum.cmd import git
+import time
 
 
 def get_external_ip():
@@ -49,5 +52,12 @@ def save_file(data):
         f.write(yaml.dump(data, default_flow_style=False))
 
 if __name__ == "__main__":
-    data = get_ips()
-    save_file(data)
+    while True:
+        try:
+            data = get_ips()
+            save_file(data)
+            git['commit', '-m', '"ip update"', 'rpi_ip.yaml']()
+            git['push']()
+        except:
+            pass
+        time.sleep(10 * 60)
