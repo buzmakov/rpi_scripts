@@ -7,7 +7,6 @@ import socket
 import yaml
 from collections import Counter
 from plumbum.cmd import git
-import time
 
 
 def get_external_ip():
@@ -41,8 +40,14 @@ def get_local_ip(target):
 
 def get_ips():
     res = {}
-    res['local'] = get_local_ip('ya.ru')
-    res['external'] = get_external_ip()
+    try:
+        res['local'] = get_local_ip('ya.ru')
+    except:
+        pass
+    try:
+        res['external'] = get_external_ip()
+    except:
+        pass
     return res
 
 
@@ -52,12 +57,10 @@ def save_file(data):
         f.write(yaml.dump(data, default_flow_style=False))
 
 if __name__ == "__main__":
-    while True:
-        try:
-            data = get_ips()
-            save_file(data)
-            git['commit', '-m', '"ip update"', 'rpi_ip.yaml']()
-            git['push']()
-        except:
-            pass
-        time.sleep(10 * 60)
+    try:
+        data = get_ips()
+        save_file(data)
+        git['commit', '-m', '"ip update"', 'rpi_ip.yaml']()
+        git['push']()
+    except:
+        pass
